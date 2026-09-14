@@ -158,6 +158,47 @@ async def generate_schema(instruction: str) -> dict:
     return heuristic_schema(instruction)
 
 
+async def extract_from_transcript(instruction: str, schema: dict, transcript_text: str) -> dict | None:
+    """Extract the schema fields from a call transcript using the LLM.
+
+    Used when the telephony provider returns a transcript but no structured
+    extraction (e.g. hosted Bolna without a configured extraction). Returns a
+    {field_name: value} dict, or None if no OPENAI_API_KEY / on any failure.
+    """
+    if not settings.OPENAI_API_KEY or not transcript_text:
+        return None
+    fields = schema.get("fields", [])
+    if not fields:
+        return None
+    try:
+        from openai import AsyncOpenAI  # lazy import
+
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        field_lines = "\n".join(
+            f'- "{f["name"]}" ({f.get("type", "string")}): {f.get("label", f["name"])}'
+            for f in fields
+        )
+        system = (
+            "You extract structured data from a phone-call transcript. "
+            "Return ONLY a JSON object whose keys are EXACTLY the field names below "
+            "and whose values are what the person said (use null if not stated). "
+            "Numbers as numbers, lists as arrays.\nFields:\n" + field_lines
+        )
+        resp = await client.chat.completions.create(
+            model=settings.SCHEMA_MODEL,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": f"Instruction: {instruction}\n\nTranscript:\n{transcript_text}"},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0,
+        )
+        data = json.loads(resp.choices[0].message.content)
+        return data if isinstance(data, dict) else None
+    except Exception:
+        return None
+
+
 def build_conversation_prompt(instruction: str, schema: dict, organisation: str = "") -> str:
     """Compose the system prompt the voice agent follows during the call."""
     org = organisation.strip() or "our organisation"
