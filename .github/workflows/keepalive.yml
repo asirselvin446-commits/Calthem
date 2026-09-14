@@ -1,0 +1,11 @@
+name: keepalive
+# Pings the Render backend so its free instance doesn't sleep (runs on GitHub, not your laptop).
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -sS -m 30 https://calthem-backend.onrender.com/api/health || true
