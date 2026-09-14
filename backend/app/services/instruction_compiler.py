@@ -117,7 +117,7 @@ async def llm_schema(instruction: str) -> dict | None:
     try:
         from openai import AsyncOpenAI  # lazy import
 
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY, base_url=settings.OPENAI_BASE_URL)
         system = (
             "You convert a data-collection instruction into a JSON extraction "
             "schema. Output ONLY JSON of the form "
@@ -173,7 +173,7 @@ async def extract_from_transcript(instruction: str, schema: dict, transcript_tex
     try:
         from openai import AsyncOpenAI  # lazy import
 
-        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY, base_url=settings.OPENAI_BASE_URL)
         field_lines = "\n".join(
             f'- "{f["name"]}" ({f.get("type", "string")}): {f.get("label", f["name"])}'
             for f in fields

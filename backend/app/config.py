@@ -42,8 +42,11 @@ class Settings:
     # The engine runs locally, so this is Calthem's own address by default.
     CALTHEM_WEBHOOK_BASE: str = os.getenv("CALTHEM_WEBHOOK_BASE", "http://localhost:8090")
 
-    # --- LLM (instruction -> extraction schema). Optional in mock mode. ---
+    # --- LLM (instruction -> schema, transcript -> extraction). Optional in mock. ---
+    # OpenAI-compatible: leave OPENAI_BASE_URL unset for OpenAI, or point it at a
+    # free provider like Groq (https://api.groq.com/openai/v1) with a Groq key.
     OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY")
+    OPENAI_BASE_URL: str | None = os.getenv("OPENAI_BASE_URL") or None
     SCHEMA_MODEL: str = os.getenv("CALTHEM_SCHEMA_MODEL", "gpt-4o-mini")
 
     # --- Bulk queue ---
