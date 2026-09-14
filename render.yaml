@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: calthem-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: TELEPHONY_ADAPTER
+        value: bolna
+      - key: BOLNA_API_URL
+        value: https://api.bolna.ai
+      - key: TELEPHONY_API_URL
+        value: https://api.bolna.ai
+      - key: BOLNA_FROM_NUMBER
+        value: "+17406194681"
+      - key: CALTHEM_SCHEMA_MODEL
+        value: gpt-4o-mini
+      - key: CALTHEM_DEFAULT_REGION
+        value: IN
+      # Secrets / post-deploy values — set these in the Render dashboard:
+      #   BOLNA_API_KEY        = your Bolna key
+      #   CALTHEM_WEBHOOK_BASE = this service's own https URL (after first deploy)
+      - key: BOLNA_API_KEY
+        sync: false
+      - key: CALTHEM_WEBHOOK_BASE
+        sync: false
