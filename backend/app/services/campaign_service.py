@@ -37,6 +37,9 @@ async def create_campaign(
         language=language,
         max_duration=max_duration,
         webhook_url=webhook_url,
+        # Hosted Bolna needs webhook_url INSIDE agent_config (not as a task),
+        # otherwise call results are never posted back to Calthem.
+        webhook_in_config=settings.bolna_hosted,
     )
 
     campaign = Campaign(

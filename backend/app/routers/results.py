@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -13,6 +14,11 @@ from ..db import get_db
 from ..models import Campaign, Contact, Call, CallStatus
 
 router = APIRouter(prefix="/api/campaigns", tags=["results"])
+
+
+def _norm_key(k: object) -> str:
+    """Normalize a field key for tolerant matching (lowercase, alphanumeric only)."""
+    return re.sub(r"[^a-z0-9]", "", str(k).lower())
 
 
 def _build_rows(db: Session, campaign: Campaign) -> tuple[list[dict], list[dict]]:
@@ -47,8 +53,13 @@ def _build_rows(db: Session, campaign: Campaign) -> tuple[list[dict], list[dict]
             "collected_at": latest.ended_at.isoformat() if latest and latest.ended_at else None,
         }
         extracted = (latest.extracted_data if latest else {}) or {}
+        # Bolna picks its own key names from the instruction, which may differ in
+        # case/spacing/underscores from Calthem's field names. Match tolerantly.
+        norm_extracted = {_norm_key(k): v for k, v in extracted.items()}
         for f in fields:
             val = extracted.get(f["name"])
+            if val is None:
+                val = norm_extracted.get(_norm_key(f["name"]))
             if isinstance(val, list):
                 val = ", ".join(str(v) for v in val)
             row[f["name"]] = val if val is not None else (contact.extra.get(f["name"]) if contact.extra else None)
