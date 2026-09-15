@@ -117,10 +117,17 @@ def export_results(campaign_id: str, format: str = Query("xlsx"),
             io.BytesIO(buf.getvalue().encode()), media_type="text/csv",
             headers={"Content-Disposition": f'attachment; filename="{safe}.csv"'})
 
-    # default xlsx
+    # default xlsx. Force every data cell to Excel "text" format so long numbers
+    # (phone numbers, IDs the caller says) are shown literally, not as 9.18E+11.
     buf = io.BytesIO()
     with pd.ExcelWriter(buf, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Results")
+        ws = writer.sheets["Results"]
+        for row in ws.iter_rows(min_row=2):  # skip header
+            for cell in row:
+                if cell.value is not None:
+                    cell.value = str(cell.value)
+                cell.number_format = "@"
     buf.seek(0)
     return StreamingResponse(
         buf,
