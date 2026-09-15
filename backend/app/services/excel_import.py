@@ -7,6 +7,7 @@ issues, and preserves any extra columns.
 from __future__ import annotations
 
 import io
+import re
 from typing import Any
 
 import pandas as pd
@@ -23,6 +24,25 @@ _COLUMN_ALIASES: dict[str, list[str]] = {
     "department": ["department", "dept", "branch", "team", "division",
                    "course", "class"],
 }
+
+
+def _clean_numeric_cell(s: str) -> str:
+    """Repair phone values that a spreadsheet stored as NUMBERS.
+
+    Excel shows a 12-digit phone as 9.18779E+11 and stores it as a float, so the
+    cell can arrive as '918778948875.0' or '9.18779e+11' — both of which would
+    corrupt the number once non-digits are stripped. Convert those back to the
+    plain integer string.
+    """
+    s = (s or "").strip()
+    if re.fullmatch(r"\d+\.0+", s):          # 918778948875.0
+        return s.split(".")[0]
+    if re.fullmatch(r"[+-]?\d+(?:\.\d+)?[eE][+-]?\d+", s):  # scientific notation
+        try:
+            return str(int(float(s)))
+        except (ValueError, OverflowError):
+            return s
+    return s
 
 
 def _match_column(header: str) -> str | None:
@@ -83,7 +103,7 @@ def parse_contacts(filename: str, content: bytes, region: str | None = None) -> 
 
     for i, row in df.iterrows():
         rownum = int(i) + 2  # human-friendly (header = row 1)
-        raw_phone = str(row.get(mapping["phone"], "")).strip() if "phone" in mapping else ""
+        raw_phone = _clean_numeric_cell(str(row.get(mapping["phone"], ""))) if "phone" in mapping else ""
         name = str(row.get(mapping["name"], "")).strip() if "name" in mapping else ""
 
         phone, is_valid = normalize_phone(raw_phone, region) if raw_phone else ("", False)
