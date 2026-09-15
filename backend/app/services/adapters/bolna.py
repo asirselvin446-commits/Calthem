@@ -32,16 +32,40 @@ class BolnaAdapter(CallAdapter):
     async def ensure_agent(self, campaign: Campaign, db) -> str:
         """Return the Bolna agent id for this campaign.
 
-        If BOLNA_AGENT_ID is configured, every call reuses that one agent (no
-        per-campaign agent creation — avoids agent sprawl). Otherwise a new
-        agent is created once per campaign and cached on campaign.agent_id.
+        If BOLNA_AGENT_ID is configured, that ONE agent is reused for every call
+        (no sprawl) — but we UPDATE its prompt to this campaign's instruction
+        first, so the questions stay dynamic. Otherwise a new agent is created
+        once per campaign and cached on campaign.agent_id.
         """
-        if settings.BOLNA_AGENT_ID.strip():
-            return settings.BOLNA_AGENT_ID.strip()
+        webhook_url = f"{settings.CALTHEM_WEBHOOK_BASE.rstrip('/')}/api/webhooks/bolna"
+
+        # Reused single agent: refresh its config to this campaign's instruction.
+        pinned = settings.BOLNA_AGENT_ID.strip()
+        if pinned:
+            config = build_agent_config(
+                name=campaign.name,
+                instruction=campaign.instruction,
+                schema=campaign.extraction_schema,
+                organisation=campaign.organisation,
+                voice=campaign.voice,
+                language=campaign.language,
+                max_duration=campaign.max_duration,
+                webhook_url=webhook_url,
+                webhook_in_config=settings.bolna_hosted,
+            )
+            try:
+                base = settings.BOLNA_API_URL.rstrip("/")
+                url = f"{base}/v2/agent/{pinned}" if settings.bolna_hosted else f"{base}/agent/{pinned}"
+                async with httpx.AsyncClient(timeout=30) as client:
+                    resp = await client.put(url, json=config, headers=settings.bolna_headers())
+                    resp.raise_for_status()
+            except Exception:
+                pass  # fall back to the agent's existing prompt if update fails
+            return pinned
+
         if campaign.agent_id:
             return campaign.agent_id
 
-        webhook_url = f"{settings.CALTHEM_WEBHOOK_BASE.rstrip('/')}/api/webhooks/bolna"
         config = campaign.agent_config or build_agent_config(
             name=campaign.name,
             instruction=campaign.instruction,
