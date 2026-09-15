@@ -30,7 +30,14 @@ class BolnaAdapter(CallAdapter):
     name = "bolna"
 
     async def ensure_agent(self, campaign: Campaign, db) -> str:
-        """Create the Bolna agent for this campaign if not already created."""
+        """Return the Bolna agent id for this campaign.
+
+        If BOLNA_AGENT_ID is configured, every call reuses that one agent (no
+        per-campaign agent creation — avoids agent sprawl). Otherwise a new
+        agent is created once per campaign and cached on campaign.agent_id.
+        """
+        if settings.BOLNA_AGENT_ID.strip():
+            return settings.BOLNA_AGENT_ID.strip()
         if campaign.agent_id:
             return campaign.agent_id
 

@@ -41,6 +41,10 @@ class Settings:
     # Telephony provider the Bolna agent uses for phone I/O: "plivo" or "twilio".
     # Must match the provider of BOLNA_FROM_NUMBER (a Bolna-bought number is Plivo).
     BOLNA_TELEPHONY_PROVIDER: str = os.getenv("BOLNA_TELEPHONY_PROVIDER", "twilio")
+    # Reuse ONE pre-existing Bolna agent for every call instead of creating a new
+    # agent per campaign. Set to an existing agent_id to stop agent sprawl.
+    # (Configure that agent's webhook_url to Calthem's /api/webhooks/bolna.)
+    BOLNA_AGENT_ID: str = os.getenv("BOLNA_AGENT_ID", "")
     # Base URL where the Bolna engine can POST call results back to Calthem.
     # The engine runs locally, so this is Calthem's own address by default.
     CALTHEM_WEBHOOK_BASE: str = os.getenv("CALTHEM_WEBHOOK_BASE", "http://localhost:8090")
