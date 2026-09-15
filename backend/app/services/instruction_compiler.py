@@ -252,8 +252,8 @@ def build_agent_config(
                 "pipelines": [["transcriber", "llm", "synthesizer"]],
             },
             "tools_config": {
-                "input": {"format": "wav", "provider": "twilio"},
-                "output": {"format": "wav", "provider": "twilio"},
+                "input": {"format": "wav", "provider": settings.BOLNA_TELEPHONY_PROVIDER},
+                "output": {"format": "wav", "provider": settings.BOLNA_TELEPHONY_PROVIDER},
                 "transcriber": {
                     "encoding": "linear16",
                     "language": language,

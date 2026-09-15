@@ -38,6 +38,9 @@ class Settings:
     # Bolna account to dial out from. Leave BOLNA_API_KEY empty for self-hosted.
     BOLNA_API_KEY: str = os.getenv("BOLNA_API_KEY", "")
     BOLNA_FROM_NUMBER: str = os.getenv("BOLNA_FROM_NUMBER", "")
+    # Telephony provider the Bolna agent uses for phone I/O: "plivo" or "twilio".
+    # Must match the provider of BOLNA_FROM_NUMBER (a Bolna-bought number is Plivo).
+    BOLNA_TELEPHONY_PROVIDER: str = os.getenv("BOLNA_TELEPHONY_PROVIDER", "twilio")
     # Base URL where the Bolna engine can POST call results back to Calthem.
     # The engine runs locally, so this is Calthem's own address by default.
     CALTHEM_WEBHOOK_BASE: str = os.getenv("CALTHEM_WEBHOOK_BASE", "http://localhost:8090")
