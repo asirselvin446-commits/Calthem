@@ -59,9 +59,12 @@ class BolnaAdapter(CallAdapter):
                 async with httpx.AsyncClient(timeout=30) as client:
                     resp = await client.put(url, json=config, headers=settings.bolna_headers())
                     resp.raise_for_status()
+                return pinned  # prompt refreshed → safe to reuse the single agent
             except Exception:
-                pass  # fall back to the agent's existing prompt if update fails
-            return pinned
+                # Update failed — do NOT reuse the pinned agent with its stale
+                # prompt (that causes "template" questions). Fall through and
+                # create a fresh agent with the correct instruction instead.
+                pass
 
         if campaign.agent_id:
             return campaign.agent_id
