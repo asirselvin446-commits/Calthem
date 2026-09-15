@@ -128,8 +128,13 @@ async def bolna_webhook(request: Request, db: Session = Depends(get_db)) -> dict
         _publish(call, contact)
         return {"ok": True, "call_id": call.id, "stage": status or "update"}
 
-    # Terminal — finalize.
+    # Terminal — finalize. Surface any provider error so the dashboard shows why.
     call.ended_at = datetime.utcnow()
+    err_msg = body.get("error_message") or tele.get("error_message")
+    if err_msg:
+        if isinstance(err_msg, dict):
+            err_msg = err_msg.get("message") or str(err_msg)
+        call.error = str(err_msg)[:500]
     if status in ("no-answer", "no_answer", "noanswer"):
         call.status, cstatus = CallStatus.NO_ANSWER, ContactStatus.NO_ANSWER
     elif status == "busy":
