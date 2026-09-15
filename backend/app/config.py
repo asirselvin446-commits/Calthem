@@ -54,7 +54,13 @@ class Settings:
     # free provider like Groq (https://api.groq.com/openai/v1) with a Groq key.
     OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY")
     OPENAI_BASE_URL: str | None = os.getenv("OPENAI_BASE_URL") or None
+    # Model for Calthem's OWN LLM calls (schema + transcript extraction). Can be a
+    # Groq model when OPENAI_BASE_URL points at Groq.
     SCHEMA_MODEL: str = os.getenv("CALTHEM_SCHEMA_MODEL", "gpt-4o-mini")
+    # Model the BOLNA agent uses for the live phone conversation. This runs on
+    # Bolna's side (provider "openai"), so it MUST be a real OpenAI model that
+    # Bolna supports (e.g. gpt-4o-mini) — NOT a Groq model name.
+    BOLNA_LLM_MODEL: str = os.getenv("BOLNA_LLM_MODEL", "gpt-4o-mini")
 
     # --- Bulk queue ---
     MAX_CONCURRENCY: int = int(os.getenv("CALTHEM_MAX_CONCURRENCY", "1"))

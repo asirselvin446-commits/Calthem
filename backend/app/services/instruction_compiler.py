@@ -265,7 +265,7 @@ def build_agent_config(
                     "agent_flow_type": "streaming",
                     "llm_config": {
                         "provider": "openai",
-                        "model": settings.SCHEMA_MODEL,
+                        "model": settings.BOLNA_LLM_MODEL,
                         "request_json": False,
                     },
                 },
@@ -293,7 +293,7 @@ def build_agent_config(
                     "extraction_details": instruction.strip(),
                     "llm_config": {
                         "provider": "openai",
-                        "model": settings.SCHEMA_MODEL,
+                        "model": settings.BOLNA_LLM_MODEL,
                         "request_json": True,
                     },
                 }
@@ -372,7 +372,7 @@ def build_web_agent_config(
                     "agent_flow_type": "streaming",
                     "llm_config": {
                         "provider": "openai",
-                        "model": settings.SCHEMA_MODEL,
+                        "model": settings.BOLNA_LLM_MODEL,
                         "request_json": False,
                     },
                 },
@@ -401,7 +401,7 @@ def build_web_agent_config(
                     "extraction_details": instruction.strip(),
                     "llm_config": {
                         "provider": "openai",
-                        "model": settings.SCHEMA_MODEL,
+                        "model": settings.BOLNA_LLM_MODEL,
                         "request_json": True,
                     },
                 }
