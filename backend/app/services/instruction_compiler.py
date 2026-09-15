@@ -199,6 +199,21 @@ async def extract_from_transcript(instruction: str, schema: dict, transcript_tex
         return None
 
 
+def _resolve_stt_model() -> str:
+    """Pick a transcriber model valid for the configured provider, so a leftover
+    mismatched model (e.g. Deepgram's 'nova-2' while provider is Sarvam) can't
+    make Bolna reject the agent with a 400."""
+    prov = (settings.BOLNA_STT_PROVIDER or "deepgram").strip().lower()
+    model = (settings.BOLNA_STT_MODEL or "").strip()
+    if prov == "sarvam":
+        # saaras:v4 is Sarvam's current model (saarika is deprecated); it
+        # auto-detects and accepts ta / en / en-IN.
+        return model if model.startswith("saaras") else "saaras:v4"
+    if prov == "deepgram":
+        return model if model.startswith("nova") else "nova-2"
+    return model
+
+
 def build_conversation_prompt(instruction: str, schema: dict, organisation: str = "") -> str:
     """Compose the system prompt the voice agent follows during the call."""
     org = organisation.strip() or "our organisation"
@@ -257,7 +272,7 @@ def build_agent_config(
                 "transcriber": {
                     "encoding": "linear16",
                     "language": settings.BOLNA_STT_LANGUAGE or language,
-                    "model": settings.BOLNA_STT_MODEL,
+                    "model": _resolve_stt_model(),
                     "provider": settings.BOLNA_STT_PROVIDER,
                     "stream": True,
                 },
@@ -364,7 +379,7 @@ def build_web_agent_config(
                 "transcriber": {
                     "encoding": "linear16",
                     "language": settings.BOLNA_STT_LANGUAGE or language,
-                    "model": settings.BOLNA_STT_MODEL,
+                    "model": _resolve_stt_model(),
                     "provider": settings.BOLNA_STT_PROVIDER,
                     "stream": True,
                     "sampling_rate": 16000,
