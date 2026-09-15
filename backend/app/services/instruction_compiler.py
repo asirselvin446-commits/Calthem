@@ -258,7 +258,7 @@ def build_agent_config(
                     "encoding": "linear16",
                     "language": settings.BOLNA_STT_LANGUAGE or language,
                     "model": settings.BOLNA_STT_MODEL,
-                    "provider": "deepgram",
+                    "provider": settings.BOLNA_STT_PROVIDER,
                     "stream": True,
                 },
                 "llm_agent": {
@@ -365,7 +365,7 @@ def build_web_agent_config(
                     "encoding": "linear16",
                     "language": settings.BOLNA_STT_LANGUAGE or language,
                     "model": settings.BOLNA_STT_MODEL,
-                    "provider": "deepgram",
+                    "provider": settings.BOLNA_STT_PROVIDER,
                     "stream": True,
                     "sampling_rate": 16000,
                 },

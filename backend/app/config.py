@@ -61,9 +61,12 @@ class Settings:
     # Bolna's side (provider "openai"), so it MUST be a real OpenAI model that
     # Bolna supports (e.g. gpt-4o-mini) — NOT a Groq model name.
     BOLNA_LLM_MODEL: str = os.getenv("BOLNA_LLM_MODEL", "gpt-4o-mini")
-    # Speech-to-text (Deepgram) tuning. "nova-2" + "en-IN" greatly improves
-    # Indian-English/accent recognition. Use "multi" language for code-mixed
-    # Hindi/English, or "hi" for Hindi.
+    # Speech-to-text tuning.
+    #  - English/Indian-English: provider "deepgram", model "nova-2", lang "en-IN".
+    #  - Tamil / Tamil-English code-mixed (or other Indian languages): provider
+    #    "sarvam", model "saaras:v4" (auto-detect), lang "ta". Requires connecting
+    #    your Sarvam account at platform.bolna.ai/auth/sarvam.
+    BOLNA_STT_PROVIDER: str = os.getenv("BOLNA_STT_PROVIDER", "deepgram")
     BOLNA_STT_MODEL: str = os.getenv("BOLNA_STT_MODEL", "nova-2")
     BOLNA_STT_LANGUAGE: str = os.getenv("BOLNA_STT_LANGUAGE", "en-IN")
 
