@@ -214,6 +214,16 @@ def _resolve_stt_model() -> str:
     return model
 
 
+def _resolve_stt_language(fallback: str) -> str:
+    """Pick a language code valid for the provider. Sarvam rejects Deepgram's
+    'multi'; default such cases to Indian English so the agent doesn't 400."""
+    prov = (settings.BOLNA_STT_PROVIDER or "deepgram").strip().lower()
+    lang = (settings.BOLNA_STT_LANGUAGE or "").strip() or fallback
+    if prov == "sarvam" and lang.lower() in ("multi", ""):
+        return "en-IN"
+    return lang
+
+
 def build_conversation_prompt(instruction: str, schema: dict, organisation: str = "") -> str:
     """Compose the system prompt the voice agent follows during the call."""
     org = organisation.strip() or "our organisation"
@@ -271,7 +281,7 @@ def build_agent_config(
                 "output": {"format": "wav", "provider": settings.BOLNA_TELEPHONY_PROVIDER},
                 "transcriber": {
                     "encoding": "linear16",
-                    "language": settings.BOLNA_STT_LANGUAGE or language,
+                    "language": _resolve_stt_language(language),
                     "model": _resolve_stt_model(),
                     "provider": settings.BOLNA_STT_PROVIDER,
                     "stream": True,
@@ -378,7 +388,7 @@ def build_web_agent_config(
                 "output": {"format": "pcm", "provider": "default"},
                 "transcriber": {
                     "encoding": "linear16",
-                    "language": settings.BOLNA_STT_LANGUAGE or language,
+                    "language": _resolve_stt_language(language),
                     "model": _resolve_stt_model(),
                     "provider": settings.BOLNA_STT_PROVIDER,
                     "stream": True,
