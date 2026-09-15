@@ -256,7 +256,8 @@ def build_agent_config(
                 "output": {"format": "wav", "provider": settings.BOLNA_TELEPHONY_PROVIDER},
                 "transcriber": {
                     "encoding": "linear16",
-                    "language": language,
+                    "language": settings.BOLNA_STT_LANGUAGE or language,
+                    "model": settings.BOLNA_STT_MODEL,
                     "provider": "deepgram",
                     "stream": True,
                 },
@@ -362,7 +363,8 @@ def build_web_agent_config(
                 "output": {"format": "pcm", "provider": "default"},
                 "transcriber": {
                     "encoding": "linear16",
-                    "language": language,
+                    "language": settings.BOLNA_STT_LANGUAGE or language,
+                    "model": settings.BOLNA_STT_MODEL,
                     "provider": "deepgram",
                     "stream": True,
                     "sampling_rate": 16000,

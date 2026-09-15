@@ -61,6 +61,11 @@ class Settings:
     # Bolna's side (provider "openai"), so it MUST be a real OpenAI model that
     # Bolna supports (e.g. gpt-4o-mini) — NOT a Groq model name.
     BOLNA_LLM_MODEL: str = os.getenv("BOLNA_LLM_MODEL", "gpt-4o-mini")
+    # Speech-to-text (Deepgram) tuning. "nova-2" + "en-IN" greatly improves
+    # Indian-English/accent recognition. Use "multi" language for code-mixed
+    # Hindi/English, or "hi" for Hindi.
+    BOLNA_STT_MODEL: str = os.getenv("BOLNA_STT_MODEL", "nova-2")
+    BOLNA_STT_LANGUAGE: str = os.getenv("BOLNA_STT_LANGUAGE", "en-IN")
 
     # --- Bulk queue ---
     MAX_CONCURRENCY: int = int(os.getenv("CALTHEM_MAX_CONCURRENCY", "1"))
